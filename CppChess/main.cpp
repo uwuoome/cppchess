@@ -1,12 +1,12 @@
 #include <iostream>
 #include "minmax.h"
-#include "utils.h"
+#include "console.h"
 
 array<char, 64> testBoard = {
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'k',
   'n', ' ', ' ', ' ', 'R', ' ', ' ', ' ',
+  ' ', 'q', ' ', ' ', ' ', ' ', ' ', 'Q',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', 'q', ' ', ' ', ' ', 'Q', ' ', ' ',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
   ' ', ' ', 'n', ' ', ' ', ' ', ' ', ' ',
   ' ', ' ', ' ', 'r', ' ', ' ', ' ', ' ',
@@ -19,8 +19,13 @@ int main()
     printBoard(testBoard);
 
     // test pawn moves
+    // moves available
     vector<PiecePotential> moves = getPlayerMovesAvailable(true, testBoard);
     printMovesAvailable(moves);
+
+    
+    printCheckState(true, testBoard);
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

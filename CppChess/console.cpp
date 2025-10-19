@@ -1,4 +1,5 @@
-#include "utils.h"
+#include "console.h"
+#include "convert.h"
 
 void printBoard(const array<char, 64>& board) {
 	cout << "  A B C D E F G H\n";
@@ -32,4 +33,10 @@ void printMovesAvailable(const vector<PiecePotential>& moves) {
 		}
 		cout << "\n";
 	}
+}
+
+
+void printCheckState(bool asBlack, const array<char, 64>& board) {
+	CheckState cs = getCheckState(asBlack, board, false);
+	cout << checkStateToString(cs) << "\n";
 }

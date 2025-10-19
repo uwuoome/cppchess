@@ -83,17 +83,17 @@ char squareMirror(char index) { // reverses row on mirrored 64 element boards
     return index ^ 56;
 }
 
-int locationValue(char piece, const unordered_map<char, vector<char>>& pieces) {
+int locationValue(char piece, const unordered_map<char, vector<size_t>>& pieces) {
     int result = 0;
     char black = piece | 32;
     char white = piece & ~32;
     array<char, 64> table = getTable(piece);
-    const std::vector<char>& blackPositions = pieces.at(black);
+    const std::vector<size_t>& blackPositions = pieces.at(black);
     for (size_t i = 0; i < blackPositions.size(); i++) {
         int index = static_cast<int>(blackPositions[i]);
         result += table[index];
     }
-    const std::vector<char>& whitePositions = pieces.at(white);
+    const std::vector<size_t>& whitePositions = pieces.at(white);
     for (size_t i = 0; i < whitePositions.size(); i++) {
         int index = static_cast<int>(squareMirror( whitePositions[i] ));
         result -= table[index];
@@ -109,7 +109,7 @@ int weighBoard(bool isBlack, const array<char, 64>& board, bool movesAvailable) 
         // this shouldn't occur
         return -35505;
     }
-    unordered_map<char, vector<char>> pieces = piecesOnBoard(board);
+    unordered_map<char, vector<size_t>> pieces = piecesOnBoard(board);
 
     size_t pawns = (pieces['p'].size() - pieces['P'].size()) * 100;
     size_t knights = (pieces['k'].size() - pieces['K'].size()) * 320;
@@ -128,6 +128,6 @@ int weighBoard(bool isBlack, const array<char, 64>& board, bool movesAvailable) 
     return material +locations;
 }
 
-std::string findMove(/*char board[64*/) {
+string findMove() {
 	return "a8d6";
 }

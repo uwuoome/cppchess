@@ -15,3 +15,13 @@ string toAlgebraic(size_t index) {
 string toAlgebraic(size_t from, size_t to) {
 	return toAlgebraic(from) + toAlgebraic(to);
 }
+
+string checkStateToString(CheckState state) {
+    switch (state) {
+		case NotInCheck:	return "Not in Check";
+		case Check:			return "In Check";
+		case Checkmate:		return "Checkmate";
+		case Stalemate:		return "Stalemate";
+		default:			return "Unknown State";
+    }
+}

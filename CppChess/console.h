@@ -12,3 +12,4 @@ using namespace std;
 void printBoard(const array<char, 64>& board);
 void printPositionTable(const array<char, 64>& board);
 void printMovesAvailable(const vector<PiecePotential>& moves);
+void printCheckState(bool asBlack, const array<char, 64>& board);

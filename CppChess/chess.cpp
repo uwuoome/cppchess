@@ -1,15 +1,15 @@
 #include "chess.h"
 #include <iostream>
 
-unordered_map<char, vector<char>> piecesOnBoard(const array<char, 64>& board) {
-    unordered_map<char, vector<char>> pieces = {
+unordered_map<char, vector<size_t>> piecesOnBoard(const array<char, 64>& board) {
+    unordered_map<char, vector<size_t>> pieces = {
         {'P', {}}, {'N', {}}, {'B', {}}, {'R', {}}, {'Q', {}}, {'K', {}},
         {'p', {}}, {'n', {}}, {'b', {}}, {'r', {}}, {'q', {}}, {'k', {}}
     };
     for (size_t i = 0; i < 64; i++) {
         char piece = board[i];
         if (piece != ' ' && pieces.count(piece)) {
-            pieces[piece].push_back(static_cast<char>(i));
+            pieces[piece].push_back(i);
         }
     }
     return pieces;
@@ -37,20 +37,26 @@ static bool onBoard(size_t r, size_t c) {
     return r >= 0 && r < 8 && c >= 0 && c < 8;
 }
 
+static bool pieceIsBlack(char piece) {
+    return (piece & ~32) != piece;
+}
+
+static size_t homeRow(bool irBlack, bool flipped) {
+    return irBlack == flipped ? 7 : 0;
+}
+
 static bool myPiece(bool irBlack, size_t row, size_t col, const array<char, 64>& board, bool flipped) {
     size_t index = row * 8 + col;
     if (board[index] == ' ') return false;
-    bool toTakeIsBlack = (board[index] & ~32) != board[index];
-    if (flipped) return irBlack != toTakeIsBlack;
-    return irBlack == toTakeIsBlack;
+    if (flipped) return irBlack != pieceIsBlack(board[index]);
+    return irBlack == pieceIsBlack(board[index]);
 }
 
 static bool opPiece(bool irBlack, size_t row, size_t col, const array<char, 64>& board, bool flipped) {
     size_t index = row * 8 + col;
     if (board[index] == ' ') return false;
-    bool toTakeIsBlack = (board[index] & ~32) != board[index];
-    if (flipped) return irBlack == toTakeIsBlack;
-    return irBlack != toTakeIsBlack;
+    if (flipped) return irBlack == pieceIsBlack(board[index]);
+    return irBlack != pieceIsBlack(board[index]);
 }
 
 static vector<size_t> project(bool irBlack, size_t row, size_t col, const array<char, 64>& board, bool flipped, size_t dr, size_t dc){
@@ -164,7 +170,7 @@ vector<size_t> knightMoves(bool irBlack, size_t row, size_t col, const array<cha
     return result;
 }
 
-static vector<size_t> pawnMoves(bool irBlack, size_t row, size_t col, const array<char, 64>& board, bool flipped) {
+vector<size_t> pawnMoves(bool irBlack, size_t row, size_t col, const array<char, 64>& board, bool flipped) {
     vector<size_t> result;
     auto scanAhead = [&](size_t nextRow) {
         if (board[nextRow * 8 + col] == ' ') result.push_back(nextRow * 8 + col);
@@ -217,7 +223,8 @@ vector<size_t> validMoveTargets(size_t from, const array<char, 64>& board, bool 
     char pieceCode = board[from];
     vector<size_t> movesIgnoringCheck = _validMoveTargets(pieceCode, from, board, flipped);
 
-    bool irBlack = pieceCode & ~32;
+    // only select moves that aren't entering check
+    bool irBlack = pieceIsBlack(pieceCode);
     array<char, 64> permutableBoard = board;
     auto notMovingIntoCheck = [&](size_t moveIndex) -> bool {
         permutableBoard[from] = ' ';
@@ -225,8 +232,8 @@ vector<size_t> validMoveTargets(size_t from, const array<char, 64>& board, bool 
         int kingIndex = getKingIndex(irBlack, permutableBoard);
         if (kingIndex == -1) return false;
         size_t checkFrom = pieceCanCapture(irBlack, permutableBoard, flipped, kingIndex);
-        permutableBoard[from] = pieceCode;
-        permutableBoard[moveIndex] = ' ';
+        permutableBoard[from] = board[from];
+        permutableBoard[moveIndex] = board[moveIndex];
         return checkFrom == -1;
     };
     vector<size_t> result;
@@ -234,6 +241,35 @@ vector<size_t> validMoveTargets(size_t from, const array<char, 64>& board, bool 
         movesIgnoringCheck.begin(), movesIgnoringCheck.end(), 
         back_inserter(result), notMovingIntoCheck
     );
+
+    // if castling is available here add moves to result.
+    bool notMovingKing = pieceCode != (irBlack ? 'k' : 'K');
+    if (notMovingKing || castling == 0) {
+        return result;
+    }
+    size_t home = homeRow(irBlack, flipped) * 8;
+    auto movingThroughCheck = [&](size_t lcol, size_t rcol) -> bool {
+        if (pieceCanCapture(irBlack, board, flipped, home + lcol) != -1) return true;
+        if (pieceCanCapture(irBlack, board, flipped, home + rcol) != -1) return true;
+        // additional tests for pawn control over the empty squares
+        size_t pr = (home == 0 ? 1 : 6) * 8; 
+        char opPawn = irBlack ? 'P' : 'p';
+        if (board[pr + lcol - 1] == opPawn || board[pr + lcol] == opPawn) return true;
+        if (board[pr + rcol] == opPawn || board[pr + rcol + 1] == opPawn) return true;
+        return false;
+    };
+    if (castling & 1) {                                 // neither king nor left rook has moved yet
+        bool lhsClear = (board[home + 1] == ' ' && board[home + 2] == ' ' && board[home + 3] == ' ');
+        if (lhsClear && !movingThroughCheck(2, 3)) {
+            result.push_back(home + 2);
+        }
+    }
+    if (castling & 2) {                                 // neither king nor right rook has moved yet
+        bool rhsClear = (board[home + 5] == ' ' && board[home + 6] == ' ');
+        if (rhsClear && !movingThroughCheck(5, 6)) {
+            result.push_back(home + 6);
+        }
+    }
     return result;
 }
 
@@ -262,8 +298,6 @@ static bool playerHasAnyMovesAvailable(bool isBlack, const array<char, 64>& boar
     return false;
 }
 
-
-
 bool hasElement(vector<size_t> haystack, size_t needle) {
     return find(haystack.begin(), haystack.end(), needle) != haystack.end();
 }
@@ -273,8 +307,7 @@ static vector<size_t> allPiecesCanCapture(size_t irBlack, const array<char, 64>&
     for (size_t i = 0; i < 64; i++) {
         char piece = board[i];
         if (piece == ' ') continue;
-        bool pieceIsBlack = piece & ~32;
-        if (pieceIsBlack == irBlack) continue;
+        if (pieceIsBlack(piece) == irBlack) continue;
         vector<size_t> moves = _validMoveTargets(irBlack, i, board, flipped);
         if (hasElement(moves, captureIndex)) {
             result.push_back(i);
@@ -283,24 +316,45 @@ static vector<size_t> allPiecesCanCapture(size_t irBlack, const array<char, 64>&
     return result;
 }
 
-/**
- * @param irBlack whether of not the player to test for check is black; false is white.
- * @param board 64 element array containing board tile state.
- * @param flipped true if the board is flipped upside down (from black player's perspective).
- * @param movesAvailable optional parameter, defines if moves are available to determine stalemate. If undefined (null) will work to determine.
- * @return 0 not in check, 1 check, 2 checkmate, 3 stalemate.
- */
+static vector<size_t> openAdjacent(bool irBlack, size_t from, const array<char, 64>& board) {
+    if (from < 0 || from > 63) return {};
+    vector<size_t> result;
+    size_t row = from / 8, col = from % 8;
+    auto valid = [&](char piece) -> bool {
+        if (piece == ' ') return true;
+        return pieceIsBlack(piece) != irBlack;
+    };
+    if (row > 0) { // scan above
+        if (col > 0 && valid(board[from - 9])) result.push_back(from - 9);
+        if (valid(board[from - 8])) result.push_back(from - 8);
+        if (col < 7 && valid(board[from - 7])) result.push_back(from - 7);
+    }
+    if (col > 0 && valid(board[from - 1])) result.push_back(from - 1);
+    if (col < 7 && valid(board[from + 1])) result.push_back(from + 1);
+    if (row < 7) { // scan below
+        if (col > 0 && valid(board[from + 7])) result.push_back(from + 7);
+        if (valid(board[from + 8])) result.push_back(from + 8);
+        if (col < 7 && valid(board[from + 9])) result.push_back(from + 9);
+    }
+    return result;
+}
+
 CheckState getCheckState(bool irBlack, const array<char, 64>& board, bool flipped, int movesAvailable) {
     auto const isInStaleMate = [&]() -> bool {
         if (movesAvailable != -1) return movesAvailable;
         return !playerHasAnyMovesAvailable(irBlack, board);
     };
     int kingIndex = getKingIndex(irBlack, board);
-    if (kingIndex == -1) return Stalemate;   // should never happen
+    if (kingIndex == -1) {
+        return Stalemate;   // should never happen
+    }
     int checkFrom = pieceCanCapture(irBlack, board, flipped, kingIndex);
     if (checkFrom == -1) {
-        if (isInStaleMate()) return Stalemate;
-        return NotInCheck;
+        if (isInStaleMate()) {
+            return Stalemate;
+        } else {
+            return NotInCheck;
+        }
     }
     // in check, now see if we can get out if it
     vector<size_t> checkRemovedBy = allPiecesCanCapture(!irBlack, board, flipped, checkFrom);
@@ -321,7 +375,19 @@ CheckState getCheckState(bool irBlack, const array<char, 64>& board, bool flippe
     // see if a piece can interesect check.
      
     // no piece can capture all checking pieces so see if we can move the king out of check 
+    vector<size_t>adjacentTiles = openAdjacent(irBlack, kingIndex, board);
+    if (adjacentTiles.size() == 0) return Checkmate;
 
+    // now we need to check that there's an open tile available that isn't moving into check
+    for (auto& adj : adjacentTiles) {
+        permutableBoard[adj] = permutableBoard[kingIndex];
+        permutableBoard[kingIndex] = ' ';
+        if (pieceCanCapture(irBlack, permutableBoard, flipped, adj) == -1) {
+            return Check;
+        }
+        permutableBoard[kingIndex] = board[kingIndex];
+        permutableBoard[adj] = board[adj];
+    }
 
     return Checkmate;
 }
