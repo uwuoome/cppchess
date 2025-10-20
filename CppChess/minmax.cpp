@@ -208,7 +208,7 @@ static int alphaBeta(int alpha, int beta, bool isBlack, const array<char, 64>& b
 
 string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth) {
 
-    Move bestMove = { -1, -1 };
+    Move bestMove = { 0, 0 };
     int bestValue = -99999;
     int alpha = -100000;
     int beta = 100000;
