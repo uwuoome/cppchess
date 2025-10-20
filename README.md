@@ -8,8 +8,8 @@
 * Set the environment variable using emsdk\\emsdk\_env.ps1 or .sh on Linux.
 * Copy `minmax.cpp`, `chess.cpp` and `convert.cpp` and their headers into the build directory. 
 * Copy `wasm.cpp` into the build directory (this will define the interface).
-* Compile with target running in browser: `emcc wasm.cpp minmax.cpp chess.cpp convert.cpp -o index.html -s WASM=1 -lembind -s MODULARIZE=1 -s EXPORT_ES6=1`
-* Edit `index.html` and add the function below to the Module object. 
+* Compile with target running in browser: `emcc wasm.cpp minmax.cpp chess.cpp convert.cpp -o index.html -O2 -s WASM=1 -lembind -s MODULARIZE=1 -s EXPORT_ES6=1`
+* Edit `index.html` and add the function below to the Module object. Note that when using -02 optimisations, the javascript will be minified so search for `var Module`
 * run an http server. e.g `npx http-server . -o -p 5555`
 * Point your browser at the server then press F12 to open the console and check the output. 
 
