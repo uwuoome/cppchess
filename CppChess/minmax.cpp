@@ -231,9 +231,6 @@ string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth) {
             }
         }
     }
-    return toAlgebraic(bestMove.from, bestMove.to);
-}
 
-string findMove() {
-	return "a8d6";
+    return toAlgebraic(bestMove.from, bestMove.to);
 }

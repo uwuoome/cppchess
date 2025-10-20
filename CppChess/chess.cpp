@@ -30,7 +30,7 @@ static int getKingIndex(bool irBlack, const array<char, 64>& board) {
     char targetKing = irBlack ? 'k' : 'K';
     size_t kingIndex = distance(board.begin(), find(board.begin(), board.end(), targetKing));
     if (kingIndex == 64) return -1;
-    return kingIndex;
+    return static_cast<int>(kingIndex);
 }
 
 static bool onBoard(size_t r, size_t c) {
@@ -206,11 +206,11 @@ static vector<size_t> _validMoveTargets(char piece, size_t index, const array<ch
 static int pieceCanCapture(bool irBlack, const array<char, 64>& board, bool flipped, size_t captureIndex) {
     for (size_t i = 0; i < 64; i++) {
         if (board[i] == ' ') continue;
-        bool isOpponentsPiece = (board[i] & ~32) != irBlack;
+        bool isOpponentsPiece = pieceIsBlack(board[i]) != irBlack;
         if (!isOpponentsPiece) continue;
         vector<size_t> opponentMoves = _validMoveTargets(board[i], i, board, flipped);
         if (find(opponentMoves.begin(), opponentMoves.end(), captureIndex) != opponentMoves.end()) {
-            return i;
+            return static_cast<int>(i);
         }
     }
     return -1;
@@ -302,7 +302,7 @@ bool hasElement(vector<size_t> haystack, size_t needle) {
     return find(haystack.begin(), haystack.end(), needle) != haystack.end();
 }
 
-static vector<size_t> allPiecesCanCapture(size_t irBlack, const array<char, 64>& board, bool flipped, size_t captureIndex) {
+static vector<size_t> allPiecesCanCapture(bool irBlack, const array<char, 64>& board, bool flipped, size_t captureIndex) {
     vector<size_t> result;
     for (size_t i = 0; i < 64; i++) {
         char piece = board[i];
