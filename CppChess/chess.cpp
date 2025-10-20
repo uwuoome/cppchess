@@ -395,3 +395,4 @@ CheckState getCheckState(bool irBlack, const array<char, 64>& board, bool flippe
 CheckState getCheckState(bool irBlack, const array<char, 64>& board, bool flipped) {
     return getCheckState(irBlack, board, flipped, -1);
 }
+

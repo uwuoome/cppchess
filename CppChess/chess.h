@@ -22,6 +22,7 @@ vector<PiecePotential> getPlayerMovesAvailable(bool isBlack, const array<char, 6
 // gets all move targets that the piece at the from location can move to, used when player selects a piece
 vector<size_t> validMoveTargets(size_t from, const array<char, 64>& board, bool flipped, int castling);
 // gets the game state, used by AI or after move has been made to provide user feedback
+CheckState getCheckState(bool irBlack, const array<char, 64>& board, bool flipped, int movesAvailable);
 CheckState getCheckState(bool irBlack, const array<char, 64>& board, bool flipped);
 
 // exposed for tests only

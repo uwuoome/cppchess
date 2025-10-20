@@ -1,6 +1,7 @@
 #include "minmax.h"
 
 
+
 // table values measured in centipawns, or 100th of a pawn's value, from black's perspective
 array<char, 64> pawnTable = {
     0,  0,  0,  0,  0,  0,  0,  0,
@@ -126,6 +127,111 @@ int weighBoard(bool isBlack, const array<char, 64>& board, bool movesAvailable) 
     int locations =  ploc + nloc + bloc + rloc + qloc;
     
     return material +locations;
+}
+
+struct Move {
+    size_t from;
+    size_t to;
+};
+
+static int quiesce(int alpha, int beta, bool isBlack, const array<char, 64>& board) {
+    vector<PiecePotential> moves = getPlayerMovesAvailable(isBlack, board);
+    int boardValue = weighBoard(isBlack, board, moves.size() > 0);
+    if (boardValue >= beta) {
+        return beta;
+    }
+    if (alpha < boardValue) {
+        alpha = boardValue;
+    }
+    auto isCapture = [&](size_t i) -> bool {
+        string pieces = isBlack ? "PNBRQK" : "pnbrqk";
+        return pieces.find((char)board[i]) != string::npos;
+    };
+    for (size_t i = 0; i < moves.size(); i++) {
+        size_t from = moves[i].from;
+        for (size_t t = 0; t < moves[i].to.size(); t++) {
+            size_t to = moves[i].to[t];
+            if (isCapture(to)) {
+                array<char, 64> nextBoard = board;
+                nextBoard[to] = board[from];
+                nextBoard[from] = ' ';
+                int score = -quiesce(-beta, -alpha, !isBlack, nextBoard);
+                if (score >= beta) {
+                    return beta;
+                }
+                if (score > alpha) {
+                    alpha = score;
+                }
+            }
+        }
+    }
+    return alpha;
+}
+
+static int alphaBeta(int alpha, int beta, bool isBlack, const array<char, 64>& board, int depth) {
+    if (depth == 0) {
+        return quiesce(alpha, beta, isBlack, board);
+    }
+    int bestScore = -99998;
+    vector<PiecePotential> moves = getPlayerMovesAvailable(isBlack, board);
+    if (moves.size() == 0) {
+        CheckState cs = getCheckState(isBlack, board, false, 0);
+        if (cs == Checkmate) {
+            return isBlack ? 9999 : -9999;
+        }
+        return 0;
+    }
+    // TODO: check for insufficient material
+    for (size_t i = 0; i < moves.size(); i++) {
+        size_t from = moves[i].from;
+        for (size_t t = 0; t < moves[i].to.size(); t++) {
+            size_t to = moves[i].to[t];
+            array<char, 64> nextBoard = board;
+            nextBoard[to] = board[from];
+            nextBoard[from] = ' ';
+            int score = -alphaBeta(-beta, -alpha, !isBlack, nextBoard, depth - 1);
+            if (score >= beta) {
+                return score;
+            }
+            if (score > bestScore) {
+                bestScore = score;
+            }
+            if (score > alpha) {
+                alpha = score;
+            }
+        }
+    }
+    return bestScore;
+}
+
+
+
+string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth) {
+
+    Move bestMove = { -1, -1 };
+    int bestValue = -99999;
+    int alpha = -100000;
+    int beta = 100000;
+    vector<PiecePotential> moves = getPlayerMovesAvailable(isBlack, board);
+    if (moves.size() == 0) return "";                               // game is a stalemate or checkmate  
+
+    for (size_t i = 0; i < moves.size(); i++) {                     // for each piece that can be moved
+        PiecePotential mp = moves[i];
+        for (size_t t = 0; t < mp.to.size(); t++) {                 // for each tile that it can move to
+            array<char, 64> nextBoard = board;  
+            nextBoard[mp.from] = ' ';
+            nextBoard[mp.to[t]] = board[mp.from];
+            int boardValue = -alphaBeta(-beta, -alpha, !isBlack, nextBoard, depth - 1);
+            if (boardValue > bestValue) {
+                bestValue = boardValue;
+                bestMove = { mp.from, mp.to[t] };
+            }
+            if (boardValue > alpha) {
+                alpha = boardValue;
+            }
+        }
+    }
+    return toAlgebraic(bestMove.from, bestMove.to);
 }
 
 string findMove() {

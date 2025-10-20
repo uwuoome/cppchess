@@ -1,31 +1,33 @@
 #include <iostream>
+#include <chrono>
 #include "minmax.h"
 #include "console.h"
 
 array<char, 64> testBoard = {
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'k',
-  'n', ' ', ' ', ' ', 'R', ' ', ' ', ' ',
-  ' ', 'q', ' ', ' ', ' ', ' ', ' ', 'Q',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+  'r', ' ', 'b', 'q', 'k', 'b', 'n', 'r',
+  'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p',
   ' ', ' ', 'n', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', 'r', ' ', ' ', ' ', ' ',
-  'K', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+  ' ', ' ', ' ', 'P', 'P', ' ', ' ', ' ',
+  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+  'P', 'P', 'P', ' ', ' ', 'P', 'P', 'P',
+  'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',
 };
 
 int main()
 {
     array<char, 64> table = getTable('p');
     printBoard(testBoard);
+    
+    int depth = 4;
+    auto start = chrono::high_resolution_clock::now();
+    cout << alphaBetaSearch(true, testBoard, depth) << endl;
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+    cout << "Time taken for depth " << depth << " search: " << duration.count() << " milliseconds" << endl;
 
-    // test pawn moves
-    // moves available
     vector<PiecePotential> moves = getPlayerMovesAvailable(true, testBoard);
     printMovesAvailable(moves);
-
-    
-    printCheckState(true, testBoard);
-
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
