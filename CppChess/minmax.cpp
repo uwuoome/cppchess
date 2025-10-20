@@ -80,7 +80,7 @@ CheckState getCheckState(bool isBlack, array<char, 64> board) {
     return NotInCheck; // todo
 }
 
-char squareMirror(char index) { // reverses row on mirrored 64 element boards
+char squareMirror(size_t index) { // reverses row on mirrored 64 element boards
     return index ^ 56;
 }
 
@@ -144,7 +144,7 @@ static int quiesce(int alpha, int beta, bool isBlack, const array<char, 64>& boa
         alpha = boardValue;
     }
     auto isCapture = [&](size_t i) -> bool {
-        string pieces = isBlack ? "PNBRQK" : "pnbrqk";
+        string pieces = isBlack ? "pnbrqk" : "PNBRQK";
         return pieces.find((char)board[i]) != string::npos;
     };
     for (size_t i = 0; i < moves.size(); i++) {
