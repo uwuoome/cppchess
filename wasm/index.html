@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WASM AI Test</title>
+</head>
+<body>
+
+    <h1>WASM Chess AI Test</h1>
+    <pre id="result">Loading result</pre>
+
+    <script type="module">
+import Module from './wasm.js';
+function onload(mod){
+  
+  const abMinMaxFunction = mod.abMinMax; 
+  const boardData = [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'k',
+      ' ', ' ', ' ', ' ', 'R', ' ', ' ', ' ',
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+      ' ', 'q', ' ', ' ', ' ', ' ', 'Q', ' ',
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+      ' ', ' ', ' ', 'r', ' ', ' ', ' ', ' ',
+      'K', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+  ];
+  const Board = mod.Board;
+  const cppBoard = new Board();
+  for (let i = 0; i < boardData.length; i++) {
+      cppBoard.push_back(boardData[i].charCodeAt(0)); 
+  }
+  const start = Date.now();
+  const depth = 4;
+  const result = abMinMaxFunction(true, cppBoard, depth);
+  
+  const results = document.getElementById("result");
+  results.innerText = (boardData.join(" ").match(/.{1,16}/g).join("\n")) + "\n\r"+ 
+                    ("AI search depth: "+depth) + "\n\r" +
+                    ("AI move: "+result) + "\n\r" +
+                    ("Time taken: "+((Date.now() - start) / 1000).toFixed(3)+" seconds");
+  cppBoard.delete();
+}
+Module().then( onload);
+    </script>
+</body>
+</html>
