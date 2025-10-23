@@ -12,6 +12,6 @@
 
 using namespace std;
 
-array<char, 64> getTable(char piece);
+array<int, 64> getTable(char piece);
 int weighBoard(bool isBlack, const array<char, 64>& board, bool movesAvailable);
 string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth);

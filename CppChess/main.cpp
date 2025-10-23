@@ -4,24 +4,24 @@
 #include "console.h"
 
 array<char, 64> testBoard = {
-  'r', ' ', 'b', 'q', 'k', 'b', 'n', 'r',
+  'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r',
   'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p',
-  ' ', ' ', 'n', ' ', ' ', ' ', ' ', ' ',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', 'P', 'P', ' ', ' ', ' ',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  'P', 'P', 'P', ' ', ' ', 'P', 'P', 'P',
+  ' ', ' ', ' ', ' ', 'P', ' ', ' ', ' ',
+  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+  'P', 'P', 'P', 'P', ' ', 'P', 'P', 'P',
   'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',
 };
 
 int main()
 {
-    array<char, 64> table = getTable('p');
+    array<int, 64> table = getTable('p');
     printBoard(testBoard);
     
-    int depth = 4;
+    int depth = 1;
     auto start = chrono::high_resolution_clock::now();
-    cout << alphaBetaSearch(true, testBoard, depth) << endl;
+    cout << "AI MOVE: " << alphaBetaSearch(true, testBoard, depth) << endl;
     auto end = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
     cout << "Time taken for depth " << depth << " search: " << duration.count() << " milliseconds" << endl;
