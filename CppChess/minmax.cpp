@@ -122,7 +122,7 @@ int weighBoard(bool isBlack, const array<char, 64>& board, bool movesAvailable) 
     unordered_map<char, vector<size_t>> pieces = piecesOnBoard(board);
 
     size_t pawns = (pieces['p'].size() - pieces['P'].size()) * 100;
-    size_t knights = (pieces['n'].size() - pieces['n'].size()) * 320;
+    size_t knights = (pieces['n'].size() - pieces['N'].size()) * 320;
     size_t bishops = (pieces['b'].size() - pieces['B'].size()) * 330;
     size_t rooks = (pieces['r'].size() - pieces['R'].size()) * 500;
     size_t queens = (pieces['q'].size() - pieces['Q'].size()) * 900;
