@@ -15,7 +15,7 @@ function onload(mod){
   const abMinMaxFunction = mod.abMinMax; 
   const boardData = [
       ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'k',
-      ' ', ' ', ' ', ' ', 'R', ' ', ' ', ' ',
+      'p', ' ', ' ', ' ', 'R', ' ', ' ', ' ',
       ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
       ' ', 'q', ' ', ' ', ' ', ' ', 'Q', ' ',
       ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
@@ -28,9 +28,16 @@ function onload(mod){
   for (let i = 0; i < boardData.length; i++) {
       cppBoard.push_back(boardData[i].charCodeAt(0)); 
   }
+  const AbortSignal = mod.AbortSignal;
+  const cppSignalMock = new AbortSignal(); 
+  cppSignalMock.aborted = false;
+  
   const start = Date.now();
   const depth = 4;
-  const result = abMinMaxFunction(true, cppBoard, depth);
+  function onStep(i, n){
+    console.log("step complete", i+1, "of", n);
+  }
+  const result = abMinMaxFunction(true, cppBoard, depth, cppSignalMock, onStep);
   
   const results = document.getElementById("result");
   results.innerText = (boardData.join(" ").match(/.{1,16}/g).join("\n")) + "\n\r"+ 

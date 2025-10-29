@@ -215,8 +215,13 @@ static int alphaBeta(int alpha, int beta, bool isBlack, const array<char, 64>& b
 }
 
 
-
+void defaultProgressCallback(int i, int n) {}
 string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth) {
+    return alphaBetaSearch(isBlack, board, depth, defaultAbortSignal, defaultProgressCallback);
+}
+
+string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth,
+    AbortSignal& signal, ProgressCallback onStep) {
 
     Move bestMove = { 0, 0 };
     int bestValue = -99999;
@@ -228,7 +233,7 @@ string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth) {
     for (size_t i = 0; i < pieces.size(); i++) {                     // for each piece that can be moved
         PiecePotential mp = pieces[i];
         for (size_t t = 0; t < mp.to.size(); t++) {                 // for each tile that it can move to
-            array<char, 64> nextBoard = board;  
+            array<char, 64> nextBoard = board;
             nextBoard[mp.from] = ' ';
             nextBoard[mp.to[t]] = board[mp.from];
             int boardValue = -alphaBeta(-beta, -alpha, !isBlack, nextBoard, depth - 1);
@@ -240,9 +245,12 @@ string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth) {
             if (boardValue > alpha) {
                 alpha = boardValue;
             }
-            
+
         }
-        
+        onStep(i, pieces.size());
+        if (signal.aborted) {
+            return "";
+        }
     }
     return toAlgebraic(bestMove.from, bestMove.to);
 }
