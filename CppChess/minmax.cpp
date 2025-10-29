@@ -215,13 +215,14 @@ static int alphaBeta(int alpha, int beta, bool isBlack, const array<char, 64>& b
 }
 
 
-void defaultProgressCallback(int i, int n) {}
+static bool defaultProgressCallback(int i, int n) {
+    return false; 
+}
 string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth) {
-    return alphaBetaSearch(isBlack, board, depth, defaultAbortSignal, defaultProgressCallback);
+    return alphaBetaSearch(isBlack, board, depth, defaultProgressCallback);
 }
 
-string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth,
-    AbortSignal& signal, ProgressCallback onStep) {
+string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth, ProgressCallback onStep) {
 
     Move bestMove = { 0, 0 };
     int bestValue = -99999;
@@ -247,9 +248,8 @@ string alphaBetaSearch(bool isBlack, const array<char, 64>& board, int depth,
             }
 
         }
-        onStep(i, pieces.size());
-        if (signal.aborted) {
-            return "";
+        if (onStep(i, pieces.size())) {
+            return ""; // aborted
         }
     }
     return toAlgebraic(bestMove.from, bestMove.to);

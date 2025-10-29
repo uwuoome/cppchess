@@ -14,30 +14,28 @@ function onload(mod){
   
   const abMinMaxFunction = mod.abMinMax; 
   const boardData = [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'k',
-      'p', ' ', ' ', ' ', 'R', ' ', ' ', ' ',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      ' ', 'q', ' ', ' ', ' ', ' ', 'Q', ' ',
+      'r', 'n', 'b', 'k', 'q', 'b', 'n', 'r',
+      'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p',
       ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
       ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      ' ', ' ', ' ', 'r', ' ', ' ', ' ', ' ',
-      'K', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+      ' ', ' ', ' ', 'P', ' ', ' ', ' ', ' ',
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+      'P', 'P', 'P', ' ', 'P', 'P', 'P', 'P',
+      'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',
   ];
   const Board = mod.Board;
   const cppBoard = new Board();
   for (let i = 0; i < boardData.length; i++) {
       cppBoard.push_back(boardData[i].charCodeAt(0)); 
   }
-  const AbortSignal = mod.AbortSignal;
-  const cppSignalMock = new AbortSignal(); 
-  cppSignalMock.aborted = false;
   
   const start = Date.now();
   const depth = 4;
   function onStep(i, n){
     console.log("step complete", i+1, "of", n);
+    return false; // return true to abort search
   }
-  const result = abMinMaxFunction(true, cppBoard, depth, cppSignalMock, onStep);
+  const result = abMinMaxFunction(true, cppBoard, depth, onStep);
   
   const results = document.getElementById("result");
   results.innerText = (boardData.join(" ").match(/.{1,16}/g).join("\n")) + "\n\r"+ 

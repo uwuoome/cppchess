@@ -5,24 +5,24 @@
 #include "minmax.h"
 
 
-std::string abMinMax(bool isBlack, const std::vector<char>& vboard, int depth,
-                      AbortSignal& signal, emscripten::val onStep) {
+std::string abMinMax(bool isBlack, const std::vector<char>& vboard, int depth, emscripten::val onStep) {
     if (vboard.size() != 64) {
         return "error: invalid board size."; 
     }
+    // specify that the callback returns bool abort value here
+    ProgressCallback callback = [onStep](int d, int s) -> bool {
+        return onStep(d, s).as<bool>();
+    };
     std::array<char, 64> aboard;
     std::copy(vboard.begin(), vboard.end(), aboard.begin());
-    std::string result = alphaBetaSearch(isBlack, aboard, depth, signal, onStep); 
+    std::string result = alphaBetaSearch(isBlack, aboard, depth, callback); 
     return result;
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::register_vector<char>("Board");
-    emscripten::class_<AbortSignal>("AbortSignal")
-        .constructor<>()
-        .property("aborted", &AbortSignal::aborted); // Allow JS to read/write 'aborted' property
     emscripten::function("abMinMax", 
-        (std::string(*)(bool, const std::vector<char>&, int, AbortSignal&, emscripten::val)) &abMinMax
+        (std::string(*)(bool, const std::vector<char>&, int, emscripten::val)) &abMinMax
     );
 }
 int main() {
